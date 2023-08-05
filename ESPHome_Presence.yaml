@@ -1,0 +1,59 @@
+substitutions:
+  name: "esphome-web-8e28b6"
+  friendly_name: "ESPHome Presence"
+  project_name: "Mikee.Presence"
+  project_version: "0.1"
+  sensor_pin: "D0"
+  pir_delay_off: "10s"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  project:
+    name: ${project_name}
+    version: ${project_version}
+
+
+esp8266:
+  board: d1_mini_lite # esp01_1m
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "TIJ0h+H+FqsNP0JJ5szQXSsW3luBvCNNMH4Pxh33ciU="
+
+ota:
+
+logger:
+  #baud_rate: 0 # disable uart logger on ESP8266
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esphome-Web-8E28B6"
+    password: "BYEF7wfdPdZw"
+
+captive_portal:
+
+# Example configuration entry
+
+# PIR sensor: EKM C16 03 11 1
+# ekm series, vz sensor, long distance, white lens
+# min voltage 3v, max voltage 6v, 170uA
+# output digital open collector-  voltage Vdd - 0.5v
+# 30 seconds to stabilize
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: ${sensor_pin}
+      mode:
+        input: true
+        pulldown: true
+    filters:
+      - delayed_off: ${pir_delay_off}
+    name: "PIR Sensor"
+    device_class: motion  
