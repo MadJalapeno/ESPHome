@@ -1,0 +1,118 @@
+substitutions:
+  name: "esphome-web-8e22db"
+  friendly_name: "ESPHome Web ePaper"
+  initial_temp: "0"
+  temperature_update_interval: "300s"
+  project_name: "Mikee.BoilerMonitor"
+  project_version: "0.1"
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  project:
+    name: ${project_name}
+    version: ${project_version}
+  on_boot:
+    priority: 200
+    then: 
+    - delay: 1sec
+    - component.update: my_display
+
+esp8266:
+  board: d1 # was esp01_1m
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "/wlr/1d+RqoKRe5RUYPrGfiyeDYrIeOTtf6Dk8ypKpw="
+
+ota:
+
+external_components:
+  - source:
+      type: git
+      url: https://github.com/velaar/esphome
+      ref: test_23_7
+    components: [ waveshare_epaper, display]
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esphome-Web-8E22Db"
+    password: "rv04orwskGS6"
+
+captive_portal:
+
+web_server:
+  port: 80
+
+# Example configuration entry
+font:
+  - file: 'gfonts://Roboto Mono'
+    id: robotoMono
+    size: 24
+
+#pull data from home assistant
+sensor:
+  - platform: homeassistant
+    entity_id: sensor.esphome_boiler_boiler_zone_1_return
+    id: "z1_temp"
+    internal: True
+  - platform: homeassistant
+    entity_id: sensor.esphome_boiler_boiler_zone_2_return
+    id: "z2_temp"
+    internal: True
+  - platform: homeassistant
+    entity_id: sensor.esphome_boiler_boiler_zone_3_return
+    id: "z3_temp"
+    internal: True
+  - platform: homeassistant
+    entity_id: sensor.esphome_boiler_boiler_zone_4_return
+    id: "z4_temp"
+    internal: True
+
+spi:
+  clk_pin: GPIO14  # CLK yellow wire - D
+  mosi_pin: GPIO13  # DIN blue wire - D
+
+display:
+  - platform: waveshare_epaper
+    id: my_display
+    cs_pin: GPIO15 # CD orange wire - D
+    dc_pin: GPIO5 # DC green wire - D
+    busy_pin: GPIO4 # BUSY purple wire - D
+    reset_pin: GPIO0 # RST white wire - D
+    model: 2.90inv2
+    full_update_every: 10
+    update_interval: ${temperature_update_interval}
+    rotation: 90
+    lambda: |-
+      it.printf(120, 3, id(robotoMono), TextAlign::TOP_LEFT, "Zone 1:");
+      // Print inside temperature (from homeassistant sensor)
+      if (id(z1_temp).has_state()) {
+        it.printf(300, 3, id(robotoMono), TextAlign::TOP_RIGHT , "%.1f°", id(z1_temp).state);
+      }
+      
+      it.printf(120, 33, id(robotoMono), TextAlign::TOP_LEFT, "Zone 2:");
+      // Print inside temperature (from homeassistant sensor)
+      if (id(z1_temp).has_state()) {
+        it.printf(300, 33, id(robotoMono), TextAlign::TOP_RIGHT , "%.1f°", id(z2_temp).state);
+      }      
+
+      it.printf(120, 63, id(robotoMono), TextAlign::TOP_LEFT, "Zone 3:");
+      // Print inside temperature (from homeassistant sensor)
+      if (id(z1_temp).has_state()) {
+        it.printf(300, 63, id(robotoMono), TextAlign::TOP_RIGHT , "%.1f°", id(z3_temp).state);
+      }     
+       
+      it.printf(120, 93, id(robotoMono), TextAlign::TOP_LEFT, "Zone 4:");
+      // Print inside temperature (from homeassistant sensor)
+      if (id(z1_temp).has_state()) {
+        it.printf(300, 93, id(robotoMono), TextAlign::TOP_RIGHT , "%.1f°", id(z4_temp).state);
+      }
